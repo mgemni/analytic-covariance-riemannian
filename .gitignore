@@ -1,0 +1,9 @@
+.venv/
+old_remove/
+results_eeg/Models_WithinSession/
+
+.vscode/
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
