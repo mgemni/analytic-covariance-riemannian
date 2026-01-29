@@ -8,6 +8,10 @@ in the research paper [INSERT].
 These classes override the transformation step to allow for 
 custom logic defined in the local 'utils' module, while preserving 
 compatibility with Scikit-Learn pipelines.
+
+Note: Implementation largely follows pyRiemann and scikit-learn 
+conventions to ensure compatibility. Licensed under BSD-3-Clause (see 
+LICENSE file).
 """
 
 # Imports

@@ -1,3 +1,11 @@
+"""
+Class for estimating analytic covariance matrices from multi-channel 
+time-series data.
+
+Note: Implementation largely follows pyriemann and scikit-learn 
+conventions to ensure compatibility. Licensed under BSD-3-Clause (see 
+LICENSE file).
+"""
 
 import numpy as np
 from sklearn.base import TransformerMixin, BaseEstimator
