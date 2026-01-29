@@ -143,10 +143,10 @@ While standard covariance matrices capture relationships between signal amplitud
 
 #### The Analytic Signal and Covariance matrices
 
-For zero mean multivariate time series data $\mathbf{x}(t) \in \mathbb{R}^n$,  the analytic signal using the Hilbert transform (link to Wikipedia) is constructed as:
+For zero mean multivariate time series data $\mathbf{x}(t) \in \mathbb{R}^n$,  the analytic signal is constructed using the [Hilbert transform](https://en.wikipedia.org/wiki/Hilbert_transform) $\widehat{\mathbf{x}}(t)$, as:
 
 $$
-\mathbf{x}_a(t) = \mathbf{x}(t) + i\,\widehat{\mathbf{x}}(t)
+\mathbf{x}_a(t) = \mathbf{x}(t) + i\widehat{\mathbf{x}}(t).
 $$
 
 The corresponding complex covariance matrix, or **Analytic Covariance** (ACOV) matrix, is defined as:
