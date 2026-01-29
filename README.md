@@ -1,5 +1,5 @@
 # Classification of multivariate signals using the Hilbert transform and Riemannian geometry
-This repository accompanies the paper: "*Classification of multivariate signals using the Hilbert transform and Riemannian geometry*" [1]. For a quick breakdown of the approach, see the [Explanation of Methods](#explanation-of-methods) below. If you find this code useful in your research, please cite our work: [Insert Citation]
+This repository accompanies the paper: "*Classification of multivariate signals using the Hilbert transform and Riemannian geometry*" [1]. For a quick breakdown of the approach, see the [Explanation of Methods](#explaination-of-methods) below. If you find this code useful in your research, please cite our work: [Insert Citation]
 
 
 # Abstract:
@@ -172,8 +172,7 @@ When projecting HPD matrices to the tangent space using the Logarithmic map, the
 
 $$
 V_{a}^\text{col}
-=
-\begin{bmatrix}
+=\begin{bmatrix}
     \mathrm{vech}(\sqrt{2}\mathrm{Re}(\phi_{M_{a}}({V_{a}})) + (1-\sqrt{2})\mathrm{diag}(\mathrm{Re}(\phi_{M_{a}}({V_{a}})))) \\
     \mathrm{vech}_{0}(\sqrt{2}\mathrm{Im}(\phi_{M_{a}}({V_{a}})))
 \end{bmatrix},
