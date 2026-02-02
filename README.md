@@ -43,8 +43,8 @@ from sklearn.linear_model import LogisticRegression
 from pyriemann.classification import MDM
 
 # Imports from this repo
-from estimation import AnalyticCovariances
-from tangentspace import TangentSpaceSub, TangentSpaceHPD
+from analytic_covariance_riemannian.estimation import AnalyticCovariances
+from analytic_covariance_riemannian.tangentspace import TangentSpaceSub, TangentSpaceHPD
 
 # --- Classifier pipeline examples ---
 
