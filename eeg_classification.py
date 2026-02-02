@@ -15,8 +15,8 @@ from pyriemann.classification import MDM
 
 
 # Imports from custom files in this repo
-from tangentspace import TangentSpaceSub, TangentSpaceHPD
-from estimation import AnalyticCovariances
+from analytic_covariance_riemannian.tangentspace import TangentSpaceSub, TangentSpaceHPD
+from analytic_covariance_riemannian.estimation import AnalyticCovariances
 
 
 # Initialize parameter for the Band Pass filter
@@ -68,7 +68,6 @@ param_grid["COV+MDM"] = { #Cov+MDM
 param_grid["COV+TSP+LR"] = {
     'cov__estimator': ["cov"],
     "lr__C": [0.2, 0.5, 1, 2, 5],  # 5 values, log-ish spacing
-    #"lr__C": [0.2, 0.5, 1, 2, 5, 10],  # 5 values, log-ish spacing
 }
 
 # MDM pipelines using ACOV and HACOV
@@ -84,19 +83,16 @@ param_grid["HACOV+MDM"] = {
 param_grid["ACOV+TSH+LR"] = {
     'acov__estimator': ["cov"],
     "lr__C": [0.2, 0.5, 1, 2, 5],  # 5 values, log-ish spacing
-    #"lr__C": [0.2, 0.5, 1, 2, 5, 10],  # 5 values, log-ish spacing
 }
 param_grid["HACOV+TSSUB+LR"] = {
     'hacov__estimator': ["cov"],
     "lr__C": [0.2, 0.5, 1, 2, 5],  # 5 values, log-ish spacing
-    #"lr__C": [0.2, 0.5, 1, 2, 5, 10],  # 5 values, log-ish spacing
 }
 
 # Tangent space pipeline using the non-compressed HACOV repersentation in the tangent space.
 param_grid["HACOV+TS+LR"] = {
     'hacov__estimator': ["cov"],
     "lr__C": [0.2, 0.5, 1, 2, 5],  # 5 values, log-ish spacing
-    #"lr__C": [0.2, 0.5, 1, 2, 5, 10],  # 5 values, log-ish spacing
 }
 
 

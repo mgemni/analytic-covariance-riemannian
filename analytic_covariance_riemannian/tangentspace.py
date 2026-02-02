@@ -19,7 +19,7 @@ from pyriemann.tangentspace import TangentSpace
 from pyriemann.utils.tangentspace import log_map_riemann as log_map
 
 # Local import of utilities where the custom functions are implemented.
-import utils 
+from analytic_covariance_riemannian import utils 
 
 class TangentSpaceHPD(TangentSpace):
     """

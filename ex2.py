@@ -11,7 +11,7 @@ from pyriemann.estimation import Covariances
 from pyriemann.classification import MDM
 
 #from covariance import HPDCovarianceEstimator
-from estimation import AnalyticCovariances
+from analytic_covariance_riemannian.estimation import AnalyticCovariances
 
 np.random.seed(42)
 
