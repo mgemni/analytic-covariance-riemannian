@@ -1,5 +1,5 @@
 # Classification of multivariate signals using the Hilbert transform and Riemannian geometry
-This repository accompanies the paper: "*Classification of multivariate signals using the Hilbert transform and Riemannian geometry*" [1]. For a quick breakdown of the approach, see the [Explanation of Methods](#explaination-of-methods) below. If you find this code useful in your research, please cite our work: [Insert Citation]
+This repository accompanies the paper: "*Classification of multivariate signals using the Hilbert transform and Riemannian geometry*" [1]. For a quick breakdown of the approach, see the [Explanation of Methods](#explaination-of-methods) below. For the exact code used in the paper, see the [`acov-riemannian-submission` tag](https://github.com/mgemni/analytic-covariance-riemannian/tree/acov-riemannian-submission). If you find this code useful in your research, please cite our work: [Insert Citation]
 
 
 # Abstract:
