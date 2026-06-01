@@ -17,6 +17,7 @@ LICENSE file).
 # Imports
 from pyriemann.tangentspace import TangentSpace
 from pyriemann.utils.tangentspace import log_map_riemann as log_map
+from pyriemann.utils.tangentspace import exp_map_riemann as exp_map
 
 # Local import of utilities where the custom functions are implemented.
 from analytic_covariance_riemannian import utils 
@@ -76,6 +77,28 @@ class TangentSpaceHPD(TangentSpace):
             Vectorized matrices.
         """
         return self.fit(X, y=y, sample_weight=sample_weight).transform(X)
+    
+    def inverse_transform(self, Va_col):
+        """Project set of hermitian-vectorized tangent space elements to the HPD manifold.
+
+        Parameters
+        ----------
+        Va_col : ndarray, shape (n_matrices, n_channels * n_channels)
+            Set of hermitian-vectorized tangent space elements.
+
+        Returns
+        -------
+        X : ndarray, shape (n_matrices, n_channels, n_channels)
+            Set of HPD matrices corresponding to each of tangent vector.
+        """
+
+        # Rearrange the vectorized tangent space elements back to Hermitian matrices.
+        Va = utils.unupper_herm(Va_col)
+
+        # Project back to the manifold using the exponential map.
+        X = exp_map(Va, self.reference_)
+
+        return X
     
 
 class TangentSpaceSub(TangentSpace):

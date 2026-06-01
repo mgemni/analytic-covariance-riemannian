@@ -57,3 +57,50 @@ def upper_herm(X):
     T_imag = coeffs_imag * X_imag[..., idx_imag[0], idx_imag[1]]
 
     return np.concatenate([T_real, T_imag], axis=-1)
+
+
+
+def unupper_herm(Va_col):
+    """
+    Extracts the real part of the upper triangle (including diagonal)
+    and the imaginary part of the strictly upper triangle (excluding 
+    diagonal). To pereserve the geometry/inner product, apply sqrt(2) 
+    scaling to off-diagonal elements
+
+    Returns real valued ndarray: shape (n_matrices, d), where
+    d = n*n.   
+    """
+    n = np.sqrt(Va_col.shape[-1]).astype(int)
+    if Va_col.shape[-1] != n * n:
+        raise ValueError("Vector must correspond to a square matrix")
+    
+    # Indices for upper and strictly upper triangles
+    idx_real = np.triu_indices(n)
+    idx_imag = np.triu_indices(n, k=1)
+    n_real = len(idx_real[0])   
+    
+    Va_col_real = Va_col[...,:n_real]
+    Va_col_imag = Va_col[...,n_real:]
+
+    # make symmetric by filling in the lower triangle with the transpose of the upper triangle
+    Va_real = np.zeros((Va_col.shape[0], n, n))
+    Va_imag = np.zeros((Va_col.shape[0], n, n))
+
+    # Reconstruct real part
+    unscale_real = np.where(idx_real[0] == idx_real[1], 1.0, 1.0 / np.sqrt(2))
+    Va_real[..., idx_real[0], idx_real[1]] = Va_col_real * unscale_real
+
+    # Symmetrize to fill the strictly lower triangle (transpose of upper)
+    Va_real[..., idx_imag[1], idx_imag[0]] = Va_real[..., idx_imag[0], idx_imag[1]]
+
+
+    # Reconstruct the imaginary part
+    Va_imag[..., idx_imag[0], idx_imag[1]] = Va_col_imag / np.sqrt(2)
+    
+    # Anti-symmetrize the strictly lower triangle to get a skew-symmetric imaginary part
+    Va_imag[..., idx_imag[1], idx_imag[0]] = -Va_imag[..., idx_imag[0], idx_imag[1]]
+
+    # Add real and imaginary parts together to form the full Hermitian matrices.
+    Va = Va_real + 1j * Va_imag
+
+    return Va
