@@ -2,9 +2,9 @@ import numpy as np
 
 def upper_blocks(X):
     """
-    Concatenate the upper triangle (including diagonal) of the (1,1) 
-    block and the upper triangle (excluding diagonal) of the (1,2) 
-    block. To pereserve the geometry/inner product, apply sqrt(2) 
+    Concatenate the upper triangle (including diagonal) of the (1,1)
+    block and the upper triangle (excluding diagonal) of the (1,2)
+    block. To pereserve the geometry/inner product, apply sqrt(2)
     scaling to (per block) off-diagonal elements.
 
     Returns real valued ndarray: shape (n_matrices, d), where
@@ -32,17 +32,17 @@ def upper_blocks(X):
 def upper_herm(X):
     """
     Extracts the real part of the upper triangle (including diagonal)
-    and the imaginary part of the strictly upper triangle (excluding 
-    diagonal). To pereserve the geometry/inner product, apply sqrt(2) 
+    and the imaginary part of the strictly upper triangle (excluding
+    diagonal). To pereserve the geometry/inner product, apply sqrt(2)
     scaling to off-diagonal elements
 
     Returns real valued ndarray: shape (n_matrices, d), where
-    d = n*n.   
+    d = n*n.
     """
     n = X.shape[-1]
     if X.shape[-2] != n:
         raise ValueError("Matrix must be square")
-    
+
     X_real = X.real
     X_imag = X.imag
 
@@ -63,22 +63,22 @@ def upper_herm(X):
 def unupper_herm(Va_col):
     """
     Extracts the real part of the upper triangle (including diagonal)
-    and the imaginary part of the strictly upper triangle (excluding 
-    diagonal). To pereserve the geometry/inner product, apply sqrt(2) 
+    and the imaginary part of the strictly upper triangle (excluding
+    diagonal). To pereserve the geometry/inner product, apply sqrt(2)
     scaling to off-diagonal elements
 
     Returns real valued ndarray: shape (n_matrices, d), where
-    d = n*n.   
+    d = n*n.
     """
     n = np.sqrt(Va_col.shape[-1]).astype(int)
     if Va_col.shape[-1] != n * n:
         raise ValueError("Vector must correspond to a square matrix")
-    
+
     # Indices for upper and strictly upper triangles
     idx_real = np.triu_indices(n)
     idx_imag = np.triu_indices(n, k=1)
-    n_real = len(idx_real[0])   
-    
+    n_real = len(idx_real[0])
+
     Va_col_real = Va_col[...,:n_real]
     Va_col_imag = Va_col[...,n_real:]
 
@@ -96,7 +96,7 @@ def unupper_herm(Va_col):
 
     # Reconstruct the imaginary part
     Va_imag[..., idx_imag[0], idx_imag[1]] = Va_col_imag / np.sqrt(2)
-    
+
     # Anti-symmetrize the strictly lower triangle to get a skew-symmetric imaginary part
     Va_imag[..., idx_imag[1], idx_imag[0]] = -Va_imag[..., idx_imag[0], idx_imag[1]]
 
