@@ -1,6 +1,6 @@
 .venv/
 old_remove/
-results_eeg/Models_WithinSession/
+results_eeg*/Models_WithinSession/
 
 .vscode/
 __pycache__/

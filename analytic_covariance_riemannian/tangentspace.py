@@ -16,7 +16,7 @@ LICENSE file).
 
 # Imports
 from pyriemann.tangentspace import TangentSpace
-from pyriemann.utils.tangentspace import log_map_riemann as log_map
+from pyriemann.utils.tangentspace import log_map_riemann
 
 # Local import of utilities where the custom functions are implemented.
 from analytic_covariance_riemannian import utils 
@@ -49,7 +49,7 @@ class TangentSpaceHPD(TangentSpace):
         Cref = self.reference_
         
         # Map to Tangent Space
-        Va = log_map(X, Cref)#, metric=self.metric)
+        Va = log_map_riemann(X, Cref)#, metric=self.metric)
         
         # Vectorize: Use the custom Hermitian upper-triangle extraction.
         Va_col = utils.upper_herm(Va)
@@ -106,7 +106,7 @@ class TangentSpaceSub(TangentSpace):
         Cref = self.reference_
         
         # Map to Tangent Space
-        V = log_map(X, Cref)#, metric=self.metric)
+        V = log_map_riemann(X, Cref)#, metric=self.metric)
         
         # Vectorize: Use the custom Block upper-triangle extraction.
         V_col = utils.upper_blocks(V)

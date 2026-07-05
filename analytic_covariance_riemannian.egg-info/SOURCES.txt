@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+analytic_covariance_riemannian/__init__.py
+analytic_covariance_riemannian/estimation.py
+analytic_covariance_riemannian/tangentspace.py
+analytic_covariance_riemannian/utils.py
+analytic_covariance_riemannian.egg-info/PKG-INFO
+analytic_covariance_riemannian.egg-info/SOURCES.txt
+analytic_covariance_riemannian.egg-info/dependency_links.txt
+analytic_covariance_riemannian.egg-info/requires.txt
+analytic_covariance_riemannian.egg-info/top_level.txt

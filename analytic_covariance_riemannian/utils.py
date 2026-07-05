@@ -57,3 +57,66 @@ def upper_herm(X):
     T_imag = coeffs_imag * X_imag[..., idx_imag[0], idx_imag[1]]
 
     return np.concatenate([T_real, T_imag], axis=-1)
+
+
+
+def ledoit_wolf_complex(X):
+    """
+    Computes HPD Ledoit-Wolf shrinkage for a single (channels, samples) array.
+    """
+    p, n = X.shape
+    X_centered = X - np.mean(X, axis=1, keepdims=True)
+    S = (X_centered @ X_centered.conj().T) / n
+    
+    mu = np.trace(S).real / p
+    T = mu * np.eye(p, dtype=complex)
+    
+    # Compute delta^2
+    delta_squared = np.sum(np.abs(S - T)**2)
+    if delta_squared == 0:
+        return S, 0.0
+
+    # Compute beta^2    
+    time_point_squared_norms = np.sum(np.abs(X_centered)**2, axis=0) 
+    expected_norm_squared = np.mean(time_point_squared_norms**2)
+    norm_S_squared = np.sum(np.abs(S)**2)
+    beta_squared = (expected_norm_squared - norm_S_squared) / n
+
+    # Compute shrinkage intensity
+    shrinkage = min(max(beta_squared / delta_squared, 0.0), 1.0)
+    Sigma_shrunk = (1 - shrinkage) * S + shrinkage * T
+    
+    return Sigma_shrunk, shrinkage
+
+
+def oas_complex(X):
+    """
+    Computes the HPD Oracle Approximating Shrinkage (OAS) 
+    natively for a complex (channels, samples) array.
+    """
+    # SCM
+    p, n = X.shape
+    X_centered = X - np.mean(X, axis=1, keepdims=True)
+    S = (X_centered @ X_centered.conj().T) / n
+
+    # Target Matrix
+    mu = np.trace(S).real / p
+    T = mu * np.eye(p, dtype=complex)
+    
+    # Compute U and V for the complex OAS formula
+    U = np.sum(np.abs(S)**2) # ||S||_F^2
+    V = np.trace(S).real**2  # tr(S)^2
+    
+    # The complex OAS shrinkage formula
+    num = p * (n * V - U)
+    den = (n**2 - 1) * (p * U - V)
+    
+    if den == 0:
+        shrinkage = 1.0
+    else:
+        shrinkage = min(max(num / den, 0.0), 1.0)
+        
+    # Shrunk Covariance
+    Sigma_shrunk = (1 - shrinkage) * S + shrinkage * T
+    
+    return Sigma_shrunk, shrinkage
