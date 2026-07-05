@@ -1,40 +1,41 @@
 """
 Extensions for pyriemann TangentSpace class.
 
-This module defines custom subclasses of the standard TangentSpace class 
-for implemention of vectorization strategies (Hermitian and block) used 
+This module defines custom subclasses of the standard TangentSpace class
+for implemention of vectorization strategies (Hermitian and block) used
 in the research paper [INSERT].
 
-These classes override the transformation step to allow for 
-custom logic defined in the local 'utils' module, while preserving 
+These classes override the transformation step to allow for
+custom logic defined in the local 'utils' module, while preserving
 compatibility with Scikit-Learn pipelines.
 
-Note: Implementation largely follows pyRiemann and scikit-learn 
-conventions to ensure compatibility. Licensed under BSD-3-Clause (see 
+Note: Implementation largely follows pyRiemann and scikit-learn
+conventions to ensure compatibility. Licensed under BSD-3-Clause (see
 LICENSE file).
 """
 
 # Imports
 from pyriemann.tangentspace import TangentSpace
-from pyriemann.utils.tangentspace import log_map_riemann
+from pyriemann.utils.tangentspace import log_map_riemann as log_map
+from pyriemann.utils.tangentspace import exp_map_riemann as exp_map
 
 # Local import of utilities where the custom functions are implemented.
-from analytic_covariance_riemannian import utils 
+from analytic_covariance_riemannian import utils
 
 class TangentSpaceHPD(TangentSpace):
     """
-    Tangentspace mapping using the vectorization strategy for 
+    Tangentspace mapping using the vectorization strategy for
     Hermitian matrices.
-    
-    This class inherits from pyriemann.tangentspace.TangentSpace and 
-    overrides the vectorization step to use 'utils.upper_herm' instead 
+
+    This class inherits from pyriemann.tangentspace.TangentSpace and
+    overrides the vectorization step to use 'utils.upper_herm' instead
     of the standard upper triangle extraction.
     """
 
     def transform(self, X):
         """
         Project matrices into the HPD tangent space and vectorize them.
-        
+
         Parameters
         ----------
         X : ndarray, shape (n_matrices, n_channels, n_channels)
@@ -47,18 +48,18 @@ class TangentSpaceHPD(TangentSpace):
         """
         # Retrieve reference matrix calculated during .fit()
         Cref = self.reference_
-        
+
         # Map to Tangent Space
-        Va = log_map_riemann(X, Cref)#, metric=self.metric)
-        
+        Va = log_map(X, Cref)#, metric=self.metric)
+
         # Vectorize: Use the custom Hermitian upper-triangle extraction.
         Va_col = utils.upper_herm(Va)
-        
+
         return Va_col
 
     def fit_transform(self, X, y=None, sample_weight=None):
         """
-        Fit and transform in a single function. Explicitly chains fit  
+        Fit and transform in a single function. Explicitly chains fit
         and transform to ensure custom transform() logic is applied.
 
         Parameters
@@ -76,22 +77,44 @@ class TangentSpaceHPD(TangentSpace):
             Vectorized matrices.
         """
         return self.fit(X, y=y, sample_weight=sample_weight).transform(X)
-    
+
+    def inverse_transform(self, Va_col):
+        """Project set of hermitian-vectorized tangent space elements to the HPD manifold.
+
+        Parameters
+        ----------
+        Va_col : ndarray, shape (n_matrices, n_channels * n_channels)
+            Set of hermitian-vectorized tangent space elements.
+
+        Returns
+        -------
+        X : ndarray, shape (n_matrices, n_channels, n_channels)
+            Set of HPD matrices corresponding to each of tangent vector.
+        """
+
+        # Rearrange the vectorized tangent space elements back to Hermitian matrices.
+        Va = utils.unupper_herm(Va_col)
+
+        # Project back to the manifold using the exponential map.
+        X = exp_map(Va, self.reference_)
+
+        return X
+
 
 class TangentSpaceSub(TangentSpace):
     """
-    Tangentspace mapping using the "block" vectorization strategy 
+    Tangentspace mapping using the "block" vectorization strategy
     motivated by the HACOV SPD matrix representation.
 
-    This class inherits from pyriemann.tangentspace.TangentSpace and 
-    overrides the vectorization step to use 'utils.upper_block' instead 
+    This class inherits from pyriemann.tangentspace.TangentSpace and
+    overrides the vectorization step to use 'utils.upper_block' instead
     of the standard upper triangle extraction.
     """
 
     def transform(self, X):
         """
         Project matrices into the tangent space and vectorize them.
-        
+
         Parameters
         ----------
         X : ndarray, shape (n_matrices, 2 * n_channels, 2 * n_channels)
@@ -104,18 +127,18 @@ class TangentSpaceSub(TangentSpace):
         """
         # Retrieve reference matrix calculated during .fit()
         Cref = self.reference_
-        
+
         # Map to Tangent Space
-        V = log_map_riemann(X, Cref)#, metric=self.metric)
-        
+        V = log_map(X, Cref)#, metric=self.metric)
+
         # Vectorize: Use the custom Block upper-triangle extraction.
         V_col = utils.upper_blocks(V)
-        
+
         return V_col
 
     def fit_transform(self, X, y=None, sample_weight=None):
         """
-        Fit and transform in a single function. Explicitly chains fit  
+        Fit and transform in a single function. Explicitly chains fit
         and transform to ensure custom transform() logic is applied.
 
         Parameters
