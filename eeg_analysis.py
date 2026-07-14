@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from moabb.analysis.meta_analysis import compute_dataset_statistics, compute_dataset_statistics, find_significant_differences
 
 # --- Load data ---
-save_path = "./results_eeg_lw"
+save_path = "./results_eeg_lw_new_test2"
 classes = ["ft", "lh", "rh", "tn"]
 classes_string = "-".join(classes)
 
@@ -48,8 +48,8 @@ pipeline_names_all = [
             "ACOV(oasc)+MDM", "ACOV(oasc)+TSH+LR", # ACOV-based Riemannian pipelines with OASC covariance estimation
             ]
 
-pipeline_groups = {"pipeline_names_no": pipeline_names_no, 
-                   "pipeline_names_lw": pipeline_names_lw, 
+pipeline_groups = {"pipeline_names_no": pipeline_names_no,
+                   "pipeline_names_lw": pipeline_names_lw,
                    "pipeline_names_oas": pipeline_names_oas,
                    "pipeline_names_lwc": pipeline_names_lwc,
                    "pipeline_names_oasc": pipeline_names_oasc,
@@ -58,7 +58,7 @@ pipeline_groups = {"pipeline_names_no": pipeline_names_no,
 
 # ===================================================
 # ===== Average accuracy and standard deviation =====
-# ===================================================   
+# ===================================================
 
 
 for pipeline_group_name, pipeline_group in pipeline_groups.items():
@@ -73,10 +73,10 @@ for pipeline_group_name, pipeline_group in pipeline_groups.items():
     for results_path in results_paths:
 
         print("Average accuracy and standard deviation for results in", results_path)
-        
+
         for clf_name in pipeline_names:
             file_path = os.path.join(results_path, "results_{}.csv".format(clf_name))
-            
+
             # Check if the file exists before processing
             if os.path.exists(file_path):
                 df = pd.read_csv(file_path)
@@ -94,11 +94,11 @@ for pipeline_group_name, pipeline_group in pipeline_groups.items():
 
     results_all = pd.DataFrame()
 
-    for clf_name in pipeline_names: 
+    for clf_name in pipeline_names:
 
         results_clf_name = pd.DataFrame()
         file_path = os.path.join(results_path, "results_{}.csv".format(clf_name))
-        
+
         # Check if the file exists before processing
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
@@ -110,7 +110,7 @@ for pipeline_group_name, pipeline_group in pipeline_groups.items():
                 results_all = pd.concat([results_all, df], ignore_index=True)
         else:
             print("File not found for {} in {}".format(clf_name, results_path))
-            continue            
+            continue
 
     # Store results per dataset as well
     results_per_dataset = {}
@@ -214,7 +214,7 @@ for pipeline_group_name, pipeline_group in pipeline_groups.items():
     # 3. Filter the dataframe to keep only rows with these pipelines
     filtered_results = results_all[results_all['pipeline'].isin(common_pipelines)]
 
-    # 4. For each classifier pair, a one-tailed paired-sample permutation test with 
+    # 4. For each classifier pair, a one-tailed paired-sample permutation test with
     #    the mean difference of per-subject average accuracy as the test statistic
     stats = compute_dataset_statistics(filtered_results)
 

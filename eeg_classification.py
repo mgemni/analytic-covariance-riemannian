@@ -222,7 +222,7 @@ param_grid["HACOV(oas)+TS+LR"] = {
 }
 
 
-# LWC 
+# LWC
 param_grid["ACOV(lwc)+MDM"] = { #Cov+MDM
 }
 param_grid["ACOV(lwc)+TSH+LR"] = {
@@ -252,7 +252,7 @@ subject_list = [1,2,3,4,5,6,7,8,9]
 for clf_name in pipelines.keys():
 
     dataset.subject_list = subject_list
-    path =  "./results_eeg_lw"
+    path =  "./results_eeg_lw_new_test2"
 
     evaluation = WithinSessionEvaluation(paradigm=paradigm,
                                      datasets=dataset,
@@ -260,7 +260,7 @@ for clf_name in pipelines.keys():
                                      random_state=42,
                                      hdf5_path=path,
                                      save_model=True,
-                                     n_jobs=-1,)
+                                     n_jobs=-4,)
     # Run the evaluation
     result = evaluation.process({clf_name: pipelines[clf_name]}, {clf_name: param_grid[clf_name]})
     result.to_csv(os.path.join(path,"results_{}.csv".format(clf_name)))

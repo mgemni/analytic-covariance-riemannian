@@ -108,8 +108,11 @@ def oas_complex(X):
     V = np.trace(S).real**2  # tr(S)^2
 
     # The complex OAS shrinkage formula
-    num = p * (n * V - U)
-    den = (n**2 - 1) * (p * U - V)
+    # num = p * (n * V - U)
+    # den = (n * n - 1) * (p * U - V)
+
+    num = p * (p * V - U)
+    den = (n*p - 1) * (p * U - V)
 
     if den == 0:
         shrinkage = 1.0
