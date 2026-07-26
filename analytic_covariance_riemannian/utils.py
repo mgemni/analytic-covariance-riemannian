@@ -60,66 +60,111 @@ def upper_herm(X):
 
 
 
-def ledoit_wolf_complex(X):
+def ledoit_wolf_complex(X, assume_centered=False):
     """
-    Computes HPD Ledoit-Wolf shrinkage for a single (channels, samples) array.
+    Computes HPD Ledoit-Wolf shrinkage for a single (..., channels, samples) array.
     """
-    p, n = X.shape
-    X_centered = X - np.mean(X, axis=1, keepdims=True)
-    S = (X_centered @ X_centered.conj().T) / n
+    # SCM
+    p = X.shape[-2]
+    n = X.shape[-1]
 
-    mu = np.trace(S).real / p
-    T = mu * np.eye(p, dtype=complex)
+    if assume_centered:
+        X_centered = X
+    else:
+        X_centered = X - np.mean(X, axis=-1, keepdims=True)
+
+    # Transpose by swapping the last two axes
+    S = (X_centered @ X_centered.conj().swapaxes(-2, -1)) / n
+
+    mu = np.real(np.trace(S, axis1=-2, axis2=-1)) / p
+    T = mu[..., None, None] * np.eye(p, dtype=complex)
 
     # Compute delta^2
-    delta_squared = np.sum(np.abs(S - T)**2)
-    if delta_squared == 0:
-        return S, 0.0
+    delta_squared = np.sum(np.abs(S - T)**2, axis=(-2, -1))
 
     # Compute beta^2
-    time_point_squared_norms = np.sum(np.abs(X_centered)**2, axis=0)
-    expected_norm_squared = np.mean(time_point_squared_norms**2)
-    norm_S_squared = np.sum(np.abs(S)**2)
+    time_point_squared_norms = np.sum(np.abs(X_centered)**2, axis=-2) #
+    expected_norm_squared = np.mean(time_point_squared_norms**2, axis=-1)
+    norm_S_squared = np.sum(np.abs(S)**2, axis=(-2, -1))
     beta_squared = (expected_norm_squared - norm_S_squared) / n
 
-    # Compute shrinkage intensity
-    shrinkage = min(max(beta_squared / delta_squared, 0.0), 1.0)
-    Sigma_shrunk = (1 - shrinkage) * S + shrinkage * T
+    # Compute shrinkage intensity and clip to [0, 1].
+    shrinkage = np.zeros_like(delta_squared)
+    mask = delta_squared != 0
+    shrinkage[mask] = np.clip(beta_squared[mask] / delta_squared[mask], 0.0, 1.0)
+    shrinkage[~mask] = 1.0
+
+    # Expand 1D arrays to 3D so they can multiply against the matrices
+    shrinkage_expanded = shrinkage[..., None, None]
+    Sigma_shrunk = (1 - shrinkage_expanded) * S + shrinkage_expanded * T
 
     return Sigma_shrunk, shrinkage
 
-
-def oas_complex(X):
+def oas_complex(X, assume_centered=False):
     """
     Computes the HPD Oracle Approximating Shrinkage (OAS)
-    natively for a complex (channels, samples) array.
+    natively for a complex (..., channels, samples) array.
     """
     # SCM
-    p, n = X.shape
-    X_centered = X - np.mean(X, axis=1, keepdims=True)
-    S = (X_centered @ X_centered.conj().T) / n
+    p = X.shape[-2]
+    n = X.shape[-1]
+
+    if assume_centered:
+        X_centered = X
+    else:
+        X_centered = X - np.mean(X, axis=-1, keepdims=True)
+
+    # Transpose by swapping the last two axes
+    S = (X_centered @ X_centered.conj().swapaxes(-2, -1)) / n
 
     # Target Matrix
-    mu = np.trace(S).real / p
-    T = mu * np.eye(p, dtype=complex)
+    tr_S = np.real(np.trace(S, axis1=-2, axis2=-1))
+    mu = tr_S / p
+    T = mu[..., None, None] * np.eye(p, dtype=complex)
 
-    # Compute U and V for the complex OAS formula
-    U = np.sum(np.abs(S)**2) # ||S||_F^2
-    V = np.trace(S).real**2  # tr(S)^2
+    # Compute U and V for the complex OAS formula for each matrix in the batch
+    U = np.sum(np.abs(S)**2, axis=(-2, -1)) # ||S||_F^2
+    V = tr_S**2 # tr(S)^2
 
     # The complex OAS shrinkage formula
-    # num = p * (n * V - U)
-    # den = (n * n - 1) * (p * U - V)
-
+    # From “Oracle Approximating Shrinkage Covariance Matrix Estimators for Complex Elliptical Distributions” by Elias Raninen.
     num = p * (p * V - U)
     den = (n*p - 1) * (p * U - V)
 
-    if den == 0:
-        shrinkage = 1.0
-    else:
-        shrinkage = min(max(num / den, 0.0), 1.0)
+    # Compute shrinkage intensity and clip to [0, 1].
+    shrinkage = np.zeros_like(den, dtype=float)
+    mask = den != 0
+    shrinkage[mask] = np.clip(num[mask] / den[mask], 0.0, 1.0)
+    shrinkage[~mask] = 1.0
 
-    # Shrunk Covariance
+    # Expand 1D arrays to 3D so they can multiply against the matrices
+    shrinkage_expanded = shrinkage[..., None, None]
+    Sigma_shrunk = (1 - shrinkage_expanded) * S + shrinkage_expanded * T
+
+    return Sigma_shrunk, shrinkage
+
+def minimal_shrinkage_complex(X, assume_centered=False, shrinkage=1e-4):
+    """
+    Applies a fixed minimal shrinkage to ensure full rank matrices.
+    Supports 2D (p, n) and batched (..., p, n) arrays.
+    """
+    p = X.shape[-2]
+    n = X.shape[-1]
+
+    if assume_centered:
+        X_centered = X
+    else:
+        X_centered = X - np.mean(X, axis=-1, keepdims=True)
+
+    # SCM
+    S = (X_centered @ X_centered.conj().swapaxes(-2, -1)) / n
+
+    # Target Matrix
+    tr_S = np.real(np.trace(S, axis1=-2, axis2=-1))
+    mu = tr_S / p
+    T = mu[..., None, None] * np.eye(p, dtype=complex)
+
+    # Apply the fixed shrinkage
     Sigma_shrunk = (1 - shrinkage) * S + shrinkage * T
 
     return Sigma_shrunk, shrinkage

@@ -170,10 +170,11 @@ class AnalyticRegularizedCovariances(BaseEstimator, TransformerMixin):
         else:
             raise ValueError(f"Unknown method '{self.method}'. Must be 'lwf' or 'oas'.")
 
-        for i in range(n_epochs):
-            # Call the selected function dynamically
-            cov, alpha = shrinkage_func(Z[i])
-            covariances[i] = cov
-            self.shrinkages_[i] = alpha
+        # for i in range(n_epochs):
+        #     # Call the selected function dynamically
+        #     cov, alpha = shrinkage_func(Z[i])
+        #     covariances[i] = cov
+        #     self.shrinkages_[i] = alpha
+        covariances, self.shrinkages_ = shrinkage_func(Z, assume_centered=False)
 
         return covariances
