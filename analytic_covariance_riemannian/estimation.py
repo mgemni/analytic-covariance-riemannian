@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.base import TransformerMixin, BaseEstimator
 from scipy.signal import hilbert
 from pyriemann.utils.covariance import covariances
-from .utils import ledoit_wolf_complex, oas_complex
+from .utils import ledoit_wolf_complex, oas_complex, minimal_shrinkage_complex
 
 class AnalyticCovariances(TransformerMixin, BaseEstimator):
     """Estimation of analytic covariance matrices.
@@ -143,8 +143,8 @@ class AnalyticRegularizedCovariances(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         # Validate the method parameter during fit
-        if self.method not in ['lwf', 'oas']:
-            raise ValueError(f"Unknown method '{self.method}'. Must be 'lwf' or 'oas'.")
+        if self.method not in ['lwf', 'oas', 'minimal']:
+            raise ValueError(f"Unknown method '{self.method}'. Must be 'lwf', 'oas', or 'minimal'.")
         return self
 
     def transform(self, X):
@@ -167,14 +167,11 @@ class AnalyticRegularizedCovariances(BaseEstimator, TransformerMixin):
             shrinkage_func = ledoit_wolf_complex
         elif self.method == 'oas':
             shrinkage_func = oas_complex
+        elif self.method == 'minimal':
+            shrinkage_func = minimal_shrinkage_complex
         else:
-            raise ValueError(f"Unknown method '{self.method}'. Must be 'lwf' or 'oas'.")
+            raise ValueError(f"Unknown method '{self.method}'. Must be 'lwf', 'oas', or 'minimal'.")
 
-        # for i in range(n_epochs):
-        #     # Call the selected function dynamically
-        #     cov, alpha = shrinkage_func(Z[i])
-        #     covariances[i] = cov
-        #     self.shrinkages_[i] = alpha
         covariances, self.shrinkages_ = shrinkage_func(Z, assume_centered=False)
 
         return covariances
